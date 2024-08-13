@@ -18,35 +18,34 @@ The catalogue will be organization agnostic. To make the catalogue specific to o
 
 The document will look as such in `servicecatalogue` index
 ```json
-    {
-        "documentId": "25ef909a-b7c6-4d9c-9d38-ab9e10fdc686",   // uuid auto-generated 
-        "name": "Test",     // user input
-        "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit", // user input
-        "createdAt": "2019-11-14T00:55:31.820Z", // ISO-8601 format in UTC to avoid timezone issues
-        "updatedAt": "2019-11-15T12:76:21.820Z", // Same as createdAt
-        "version": 1,  // increments on every update
-        "createdBy": "", // for user information not part of current scope
-        "updatedBy": "" // for user information not part of current scope
-    }
+{
+    "documentId": "25ef909a-b7c6-4d9c-9d38-ab9e10fdc686",   // uuid auto-generated 
+    "name": "Test",     // user input
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit", // user input
+    "createdAt": "2019-11-14T00:55:31.820Z", // ISO-8601 format in UTC to avoid timezone issues
+    "updatedAt": "2019-11-15T12:76:21.820Z", // Same as createdAt
+    "version": 1,  // increments on every update
+    "createdBy": "", // for user information not part of current scope
+    "updatedBy": "" // for user information not part of current scope
+}
 ```
 
-<!-- A custom versioning strategy will be used to enable fetching of historical version. An extra field version will be added to the document and stores in the same index. Updates will simple create a copy of the document with updated fields and version. Since this is a service catalogue versions of a document is not expected to be large but for large volumes of versioned documents, we can consider moving older versions to a different index to optimize performance. -->
 Another index called `servicecatalogueversions` will be created to keep track of versions of a service catalogue
 The document structure will look as such
 ```json
-    {
-        "versionId": "25ef909a-b7c6-4d9c-9d38-ab9e10fdc686", // random uuid identifier for this document
-        "parentId": "25ef909a-b7c6-4d9c-9d38-ab9e10fdc686",   // matches the document in service catalogue above
-        "name": "Test",     // user input
-        "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit", // user input
-        "createdAt": "2019-11-14T00:55:31.820Z", // ISO-8601 format in UTC to avoid timezone issues
-        "updatedAt": "2019-11-15T12:76:21.820Z", // Same as createdAt
-        "version": 1,  // stores the version
-        "createdBy": "", // for user information not part of current scope
-        "updatedBy": "" // for user information not part of current scope
-    }
+{
+    "versionId": "25ef909a-b7c6-4d9c-9d38-ab9e10fdc686", // random uuid identifier for this document
+    "parentId": "25ef909a-b7c6-4d9c-9d38-ab9e10fdc686",   // matches the document in service catalogue above
+    "name": "Test",     // user input
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit", // user input
+    "createdAt": "2019-11-14T00:55:31.820Z", // ISO-8601 format in UTC to avoid timezone issues
+    "updatedAt": "2019-11-15T12:76:21.820Z", // Same as createdAt
+    "version": 1,  // stores the version
+    "createdBy": "", // for user information not part of current scope
+    "updatedBy": "" // for user information not part of current scope
+}
 ```
-
+The version document is linked to the service document via the `parentId` field which points to the `documentId` in the `servicecatalogue` index. 
 This version document shall be created on every update or new service catalogue creation. It will simply be copied during creation of new service or copied from current services in case of updates in services.
 
 #### 2. Fuzzy search, sorting, filtering, version fetching & pagination
@@ -69,7 +68,7 @@ However for the scope of this project we shall put in place a middleware which d
 
 ### Testing
 
-## Production Code Additions
+## Production Code Practices
 In order to make this code production ready, the following things are added to improve certain aspects of the running service:
 
 #### 1. Graceful Shutdown
