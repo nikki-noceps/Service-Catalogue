@@ -1,7 +1,9 @@
 package services
 
 import (
-	"nikki-noceps/serviceCatalogue/context"
+	"context"
+	"fmt"
+	"nikki-noceps/serviceCatalogue/config"
 	"nikki-noceps/serviceCatalogue/database"
 )
 
@@ -9,6 +11,13 @@ type Service struct {
 	esClient database.ESClient
 }
 
-func NewService(cctx context.CustomContext) {
+func NewService(ctx context.Context, cfg *config.Configuration) (*Service, error) {
+	esClient, err := database.InitESClient(cfg.ElasticSearch)
+	if err != nil {
+		return nil, fmt.Errorf("failed to setup database: %w", err)
+	}
 
+	return &Service{
+		esClient: *esClient,
+	}, nil
 }

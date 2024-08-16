@@ -9,7 +9,12 @@ import (
 type (
 	Configuration struct {
 		App           App           `yaml:"App"`
+		Server        Server        `yaml:"Server"`
 		ElasticSearch ElasticSearch `yaml:"Database"`
+	}
+
+	Server struct {
+		Port string `yaml:"Port"`
 	}
 
 	App struct {
@@ -37,5 +42,18 @@ func Load(location string) (*Configuration, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse config: %w", err)
 	}
+	addDefaults(config)
 	return config, nil
+}
+
+func addDefaults(config *Configuration) {
+	if config.Server.Port == "" {
+		config.Server.Port = "8080"
+	}
+	if config.ElasticSearch.Host == "" {
+		config.ElasticSearch.Host = "localhost"
+	}
+	if config.ElasticSearch.Port == "" {
+		config.ElasticSearch.Port = "9200"
+	}
 }

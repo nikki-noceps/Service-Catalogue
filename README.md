@@ -58,7 +58,7 @@ As for fetching the latest versions of documents in the list all queries, we can
 descending sort on version.
 As for pagination based on our requirements, increasing the `from` parameter should suffice.
 
-> **_NOTE:_**  from suffices to our pagination use case since we are showing only a handful of results on the catalogue page. For a full fledged pagination refer [search after](https://www.elastic.co/guide/en/elasticsearch/reference/current/paginate-search-results.html#search-after) which should be used for pagination at scale.
+> **_NOTE:_**  from suffices to our pagination use case since we are showing only a handful of results on the catalogue page. For a full fledged pagination refer [search after](https://www.elastic.co/guide/en/elasticsearch/reference/current/paginate-search-results.html#search-after) which should be used for pagination at scale roughly if the document count exceeds 5000.
 
 #### 3. Authentication 
 
