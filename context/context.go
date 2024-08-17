@@ -72,13 +72,13 @@ func NewCustomContext(cfg *CustomContextConfig) CustomContext {
 		rctx = context.WithValue(rctx, keyRequestID, cfg.RequestID)
 	}
 
-	bctx := CustomContext{
+	cctx := CustomContext{
 		ctx:  rctx,
 		mu:   &sync.RWMutex{},
 		keys: map[string]string{},
 	}
 
-	return bctx
+	return cctx
 }
 
 // UserID returns UserID associated with the request otherwise returns "".
@@ -167,20 +167,20 @@ func (b CustomContext) Value(key interface{}) interface{} {
 // CustomContextFromContext returns CustomContext from given context.Context, if it fails
 // returns an empty CustomContext.
 func CustomContextFromContext(ctx context.Context) CustomContext {
-	if bctx, ok := ctx.(CustomContext); ok {
-		return bctx
+	if cctx, ok := ctx.(CustomContext); ok {
+		return cctx
 	}
 
-	bctxRaw := ctx.Value("CustomContext")
-	if bctx, ok := bctxRaw.(CustomContext); ok {
-		return bctx
+	cctxRaw := ctx.Value("CustomContext")
+	if cctx, ok := cctxRaw.(CustomContext); ok {
+		return cctx
 	}
 
 	return NewCustomContext(&CustomContextConfig{Ctx: ctx})
 }
 
-func StoreCustomContextInContext(ctx context.Context, bctx CustomContext) context.Context {
-	return context.WithValue(ctx, "CustomContext", bctx)
+func StoreCustomContextInContext(ctx context.Context, cctx CustomContext) context.Context {
+	return context.WithValue(ctx, "CustomContext", cctx)
 }
 
 // WithValue returns a copy of `parent` with `value` associated to `key`.

@@ -6,6 +6,7 @@ import (
 	"nikki-noceps/serviceCatalogue/logger"
 	"nikki-noceps/serviceCatalogue/logger/tag"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -14,6 +15,12 @@ import (
 )
 
 var requestIDHeaderKey = "x-request-id"
+
+type APIErrorResponse struct {
+	Error     error
+	TimeStamp time.Time
+	RequestId string
+}
 
 // Logger is a middleware to log the incoming request.
 func loggerMiddleware() gin.HandlerFunc {
@@ -99,4 +106,17 @@ func CustomContextInit(serviceName string) gin.HandlerFunc {
 		ctx.Request = ctx.Request.WithContext(bctx)
 		ctx.Next()
 	}
+}
+
+func ErrorMiddleware(c *gin.Context) {
+	c.Next()
+	if len(c.Errors) == 0 {
+		return
+	}
+	err := c.Errors.Last().Err
+	c.JSON(-1, &APIErrorResponse{
+		Error:     err,
+		TimeStamp: time.Now(),
+		RequestId: c.Request.Context().Value(requestIDHeaderKey).(string),
+	})
 }

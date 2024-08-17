@@ -39,6 +39,7 @@ func NewRouter(ctx context.Context, cfg *config.Configuration, svc *services.Ser
 		CORSMiddleware,
 		CustomContextInit("catalogue"),
 		loggerMiddleware(),
+		ErrorMiddleware,
 	)
 	setupRoutes(ctx, router, handlers.NewHandler(svc))
 	return router, nil
@@ -51,5 +52,5 @@ func setupRoutes(ctx context.Context, router *gin.Engine, handler *handlers.Hand
 		}
 		c.String(http.StatusOK, "Working!")
 	})
-	router.GET("/serviceCatalogue", handler.Svc.)
+	router.GET("/serviceCatalogue/search", handler.SearchSvcCatalogue)
 }
