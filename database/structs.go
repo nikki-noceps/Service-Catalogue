@@ -1,5 +1,11 @@
 package database
 
+var (
+	NameField             = "name"
+	DescriptionField      = "description"
+	ServiceCatalogueIndex = "servicecatalogue"
+)
+
 type (
 	Body struct {
 		Query *Query       `json:"query,omitempty"`

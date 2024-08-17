@@ -42,7 +42,7 @@ func InitESClient(cfg config.ElasticSearch) (*ESClient, error) {
 
 // searchRequest is a driver function which returns a raw response from elasticsearch.
 // It searches using query provided. Lookup Query struct for supported operations.
-func (es *ESClient) searchRequest(cctx context.CustomContext, query Query, index string) (*esapi.Response, error) {
+func (es *ESClient) searchRequest(cctx context.CustomContext, query *Query, index string) (*esapi.Response, error) {
 	queryBytes, err := json.Marshal(query)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal query: %w", err)
@@ -67,7 +67,7 @@ func (es *ESClient) handleSearchResponse(cctx context.CustomContext, res *esapi.
 		if err := json.NewDecoder(res.Body).Decode(&e); err != nil {
 			return nil, fmt.Errorf("error parsing the response body: %w", err)
 		}
-		return nil, fmt.Errorf("search failed, got [%s] status code %s: %w", res.Status(), e["error"].(map[string]interface{})["type"], e["error"].(map[string]interface{})["reason"])
+		return nil, fmt.Errorf("search failed, got [%s] status code %s: %T", res.Status(), e["error"].(map[string]interface{})["type"], e["error"].(map[string]interface{})["reason"])
 	}
 
 	var r map[string]any
@@ -83,7 +83,7 @@ func (es *ESClient) handleSearchResponse(cctx context.CustomContext, res *esapi.
 	return hits, nil
 }
 
-func (es *ESClient) SearchAndGetHits(cctx context.CustomContext, query Query, index string) ([]any, error) {
+func (es *ESClient) SearchAndGetHits(cctx context.CustomContext, query *Query, index string) ([]any, error) {
 	res, err := es.searchRequest(cctx, query, index)
 	if err != nil {
 		return nil, err
