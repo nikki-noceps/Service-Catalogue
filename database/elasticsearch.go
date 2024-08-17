@@ -1,0 +1,97 @@
+package database
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"nikki-noceps/serviceCatalogue/config"
+	"nikki-noceps/serviceCatalogue/context"
+
+	es "github.com/elastic/go-elasticsearch/v8"
+	"github.com/elastic/go-elasticsearch/v8/esapi"
+)
+
+type ESClient struct {
+	client *es.Client
+}
+
+// Creates a new elasticsearch client. Tests the connection and returns it.
+// Returns a wrapped error in case of any issues
+func InitESClient(cfg config.ElasticSearch) (*ESClient, error) {
+	esConfig := es.Config{
+		Addresses: []string{fmt.Sprintf("%s:%s", cfg.Host, cfg.Port)},
+		Username:  cfg.Username,
+		Password:  cfg.Password,
+	}
+
+	es, err := es.NewClient(esConfig)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create new elasticsearch client: %w", err)
+	}
+
+	info, err := es.Info()
+	if err != nil {
+		return nil, fmt.Errorf("failed to ping elasticsearch: %w", err)
+	}
+	defer info.Body.Close()
+
+	return &ESClient{
+		client: es,
+	}, nil
+}
+
+// searchRequest is a driver function which returns a raw response from elasticsearch.
+// It searches using query provided. Lookup Query struct for supported operations.
+func (es *ESClient) searchRequest(cctx context.CustomContext, query Query, index string) (*esapi.Response, error) {
+	queryBytes, err := json.Marshal(query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal query: %w", err)
+	}
+
+	req := esapi.SearchRequest{
+		Index: []string{index},
+		Body:  bytes.NewReader(queryBytes),
+	}
+	res, err := req.Do(cctx, es.client)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute es request: %w", err)
+	}
+	return res, nil
+}
+
+func (es *ESClient) handleSearchResponse(cctx context.CustomContext, res *esapi.Response) ([]any, error) {
+	defer res.Body.Close()
+
+	if res.IsError() {
+		var e map[string]interface{}
+		if err := json.NewDecoder(res.Body).Decode(&e); err != nil {
+			return nil, fmt.Errorf("error parsing the response body: %w", err)
+		}
+		return nil, fmt.Errorf("search failed, got [%s] status code %s: %w", res.Status(), e["error"].(map[string]interface{})["type"], e["error"].(map[string]interface{})["reason"])
+	}
+
+	var r map[string]any
+	if err := json.NewDecoder(res.Body).Decode(&r); err != nil {
+		return nil, fmt.Errorf("error parsing the response body: %w", err)
+	}
+
+	hits, ok := r["hits"].(map[string]interface{})["hits"].([]any)
+	if !ok {
+		return nil, fmt.Errorf("failed to parse hits in es response")
+	}
+
+	return hits, nil
+}
+
+func (es *ESClient) SearchAndGetHits(cctx context.CustomContext, query Query, index string) ([]any, error) {
+	res, err := es.searchRequest(cctx, query, index)
+	if err != nil {
+		return nil, err
+	}
+
+	hits, err := es.handleSearchResponse(cctx, res)
+	if err != nil {
+		return nil, err
+	}
+	return hits, nil
+}
