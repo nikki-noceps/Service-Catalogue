@@ -1,9 +1,10 @@
 package config
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
+
+	"gopkg.in/yaml.v3"
 )
 
 type (
@@ -38,7 +39,7 @@ func Load(location string) (*Configuration, error) {
 		return nil, fmt.Errorf("failed to read file: %w", err)
 	}
 	config := &Configuration{}
-	err = json.Unmarshal(data, config)
+	err = yaml.Unmarshal(data, config)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse config: %w", err)
 	}

@@ -1,14 +1,33 @@
 package database
 
+var (
+	NameField                    = "name"
+	DescriptionField             = "description"
+	ServiceCatalogueIndex        = "servicecatalogue"
+	ServiceCatalogueVersionIndex = "servicecatalogueversions"
+)
+
+var (
+	Asc  SortOrder = "asc"
+	Desc SortOrder = "desc"
+)
+
 type (
+	// SortOrder a custom type for sort in elasticsearch
+	SortOrder string
+
+	// Body Represents the body to be sent to elasticsearch api request
 	Body struct {
 		Query *Query       `json:"query,omitempty"`
-		Sort  []*TermQuery `json:"sort,omitempty"`
+		Sort  []*SortField `json:"sort,omitempty"`
+		From  int          `json:"from,omitempty"`
+		Size  int          `json:"size,omitempty"`
 	}
+
 	// Query represents a generic Elasticsearch query structure
 	Query struct {
 		Match         *MatchQuery         `json:"match,omitempty"`
-		MultiMatch    *MultiMatch         `json:"multimatch,omitempty"`
+		MultiMatch    *MultiMatch         `json:"multi_match,omitempty"`
 		Term          *TermQuery          `json:"term,omitempty"`
 		Range         *RangeQuery         `json:"range,omitempty"`
 		Bool          *BoolQuery          `json:"bool,omitempty"`
@@ -30,16 +49,16 @@ type (
 	}
 
 	// TermQuery represents a term query
-	TermQuery struct {
-		Field string `json:"field"`
-		Value any    `json:"value"`
+	TermQuery map[string]*FieldValue
+
+	FieldValue struct {
+		Value any `json:"value"`
 	}
 
 	// RangeQuery represents a range query
-	RangeQuery struct {
-		Field string `json:"field"`
-		Gte   any    `json:"gte,omitempty"`
-		Lte   any    `json:"lte,omitempty"`
+	RangeQuery map[string]struct {
+		Gte any `json:"gte,omitempty"`
+		Lte any `json:"lte,omitempty"`
 	}
 
 	// BoolQuery represents a boolean query
@@ -65,4 +84,5 @@ type (
 	ScriptQuery struct {
 		Script string `json:"script"`
 	}
+	SortField map[string]SortOrder
 )

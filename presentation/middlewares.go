@@ -2,12 +2,15 @@ package presentation
 
 import (
 	"fmt"
+	"net/http"
 	"nikki-noceps/serviceCatalogue/context"
 	"nikki-noceps/serviceCatalogue/logger"
 	"nikki-noceps/serviceCatalogue/logger/tag"
+	"runtime/debug"
 	"strings"
 	"time"
 
+	nice "github.com/ekyoung/gin-nice-recovery"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"go.opentelemetry.io/otel/attribute"
@@ -17,9 +20,9 @@ import (
 var requestIDHeaderKey = "x-request-id"
 
 type APIErrorResponse struct {
-	Error     error
-	TimeStamp time.Time
-	RequestId string
+	Error     string    `json:"error"`
+	TimeStamp time.Time `json:"timestamp"`
+	RequestId string    `json:"requestId"`
 }
 
 // Logger is a middleware to log the incoming request.
@@ -90,12 +93,11 @@ func CustomContextInit(serviceName string) gin.HandlerFunc {
 		// initialise an attributed logger
 		lg := logger.WITH(
 			tag.NewAnyTag("service.name", serviceName),
-			tag.NewAnyTag("traceId", traceID),
 			tag.NewAnyTag("requestId", requestID),
 		)
 
 		// initialise the CustomContext
-		bctx := context.NewCustomContext(&context.CustomContextConfig{
+		cctx := context.NewCustomContext(&context.CustomContextConfig{
 			RequestID: requestID,
 			TraceID:   traceID,
 			Logger:    lg,
@@ -103,7 +105,7 @@ func CustomContextInit(serviceName string) gin.HandlerFunc {
 		})
 
 		// replace current request context with CustomContext
-		ctx.Request = ctx.Request.WithContext(bctx)
+		ctx.Request = ctx.Request.WithContext(cctx)
 		ctx.Next()
 	}
 }
@@ -114,9 +116,21 @@ func ErrorMiddleware(c *gin.Context) {
 		return
 	}
 	err := c.Errors.Last().Err
-	c.JSON(-1, &APIErrorResponse{
-		Error:     err,
+	cctx := context.CustomContextFromContext(c.Request.Context())
+	c.JSON(c.Writer.Status(), &APIErrorResponse{
+		Error:     err.Error(),
 		TimeStamp: time.Now(),
-		RequestId: c.Request.Context().Value(requestIDHeaderKey).(string),
+		RequestId: cctx.RequestID(),
 	})
+}
+
+func PanicRecovery() gin.HandlerFunc {
+	panicHandler := func(c *gin.Context, err interface{}) {
+		cctx := context.CustomContextFromContext(c.Request.Context())
+
+		cctx.Logger().ERROR("PANIC_OCCURRED", tag.NewAnyTag("trace", string(debug.Stack())), tag.NewAnyTag("err", err))
+
+		c.JSON(http.StatusInternalServerError, nil)
+	}
+	return nice.Recovery(panicHandler)
 }

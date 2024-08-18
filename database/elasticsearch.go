@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"nikki-noceps/serviceCatalogue/config"
 	"nikki-noceps/serviceCatalogue/context"
+	"nikki-noceps/serviceCatalogue/logger/tag"
 
 	es "github.com/elastic/go-elasticsearch/v8"
 	"github.com/elastic/go-elasticsearch/v8/esapi"
@@ -42,7 +43,7 @@ func InitESClient(cfg config.ElasticSearch) (*ESClient, error) {
 
 // searchRequest is a driver function which returns a raw response from elasticsearch.
 // It searches using query provided. Lookup Query struct for supported operations.
-func (es *ESClient) searchRequest(cctx context.CustomContext, query Query, index string) (*esapi.Response, error) {
+func (es *ESClient) searchRequest(cctx context.CustomContext, query *Body, index string) (*esapi.Response, error) {
 	queryBytes, err := json.Marshal(query)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal query: %w", err)
@@ -63,11 +64,12 @@ func (es *ESClient) handleSearchResponse(cctx context.CustomContext, res *esapi.
 	defer res.Body.Close()
 
 	if res.IsError() {
-		var e map[string]interface{}
+		cctx.Logger().ERROR("search failed", tag.NewAnyTag("res", res))
+		var e map[string]any
 		if err := json.NewDecoder(res.Body).Decode(&e); err != nil {
 			return nil, fmt.Errorf("error parsing the response body: %w", err)
 		}
-		return nil, fmt.Errorf("search failed, got [%s] status code %s: %w", res.Status(), e["error"].(map[string]interface{})["type"], e["error"].(map[string]interface{})["reason"])
+		return nil, fmt.Errorf("search failed, got [%s] with error: %v", res.Status(), e)
 	}
 
 	var r map[string]any
@@ -83,7 +85,7 @@ func (es *ESClient) handleSearchResponse(cctx context.CustomContext, res *esapi.
 	return hits, nil
 }
 
-func (es *ESClient) SearchAndGetHits(cctx context.CustomContext, query Query, index string) ([]any, error) {
+func (es *ESClient) SearchAndGetHits(cctx context.CustomContext, query *Body, index string) ([]any, error) {
 	res, err := es.searchRequest(cctx, query, index)
 	if err != nil {
 		return nil, err
@@ -94,4 +96,30 @@ func (es *ESClient) SearchAndGetHits(cctx context.CustomContext, query Query, in
 		return nil, err
 	}
 	return hits, nil
+}
+
+// CreateDocument takes in bytes of body to create document in index provided
+// Returns create respones and error if any
+func (es *ESClient) CreateDocument(cctx context.CustomContext, docBytes []byte, index string) (*esapi.Response, error) {
+	req := esapi.IndexRequest{
+		Index: index,
+		Body:  bytes.NewReader(docBytes),
+	}
+
+	// Execute the request
+	res, err := req.Do(cctx, es.client)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute es request: %w", err)
+	}
+
+	// Handle the response
+	if res.IsError() {
+		var e map[string]any
+		if err := json.NewDecoder(res.Body).Decode(&e); err != nil {
+			return nil, fmt.Errorf("error parsing the response body: %w", err)
+		}
+		return nil, fmt.Errorf("create failed, got [%s] status code %v", res.Status(), e)
+	}
+
+	return res, nil
 }

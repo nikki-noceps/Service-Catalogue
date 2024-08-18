@@ -40,6 +40,7 @@ func NewRouter(ctx context.Context, cfg *config.Configuration, svc *services.Ser
 		CustomContextInit("catalogue"),
 		loggerMiddleware(),
 		ErrorMiddleware,
+		PanicRecovery(),
 	)
 	setupRoutes(ctx, router, handlers.NewHandler(svc))
 	return router, nil
@@ -49,8 +50,12 @@ func setupRoutes(ctx context.Context, router *gin.Engine, handler *handlers.Hand
 	router.GET("/health", func(c *gin.Context) {
 		if ToggleHealthCheck {
 			c.String(http.StatusInternalServerError, "Server Shutting Down")
+			return
 		}
 		c.String(http.StatusOK, "Working!")
 	})
+	router.GET("/serviceCatalogue", handler.ListSvcCatalogue)
+	router.POST("/serviceCatalogue", handler.CreateSvcCatalogue)
 	router.GET("/serviceCatalogue/search", handler.SearchSvcCatalogue)
+	router.GET("/serviceCatalogue/:serviceId", handler.FetchServiceById)
 }

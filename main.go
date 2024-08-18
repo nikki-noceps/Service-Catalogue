@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"logger"
 	"net/http"
 	"nikki-noceps/serviceCatalogue/config"
 	"nikki-noceps/serviceCatalogue/logger"
@@ -32,13 +31,13 @@ func main() {
 
 	go func() {
 		osCall := <-c
-		logger.Printf("[OS INTERRUPT] system call: %+v", osCall)
+		logger.INFO("[OS INTERRUPT] system call", tag.NewAnyTag("OScall", osCall))
 		presentation.ToggleHealthCheck = true
 		time.Sleep(5 * time.Second)
 		cancel()
 	}()
 
-	cfg, err := config.Load("./config.yml")
+	cfg, err := config.Load("config.yml")
 	if err != nil {
 		logger.FATAL("failed to load config", tag.NewErrorTag(err))
 		return
