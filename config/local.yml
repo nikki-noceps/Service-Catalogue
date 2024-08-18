@@ -1,0 +1,9 @@
+
+App:
+  LogLevel: "debug"
+  Environment: "local"
+Server:
+  Port: 8080
+Database:
+  Host: "http://localhost"
+  Port: 9200
