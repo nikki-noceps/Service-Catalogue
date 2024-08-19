@@ -11,19 +11,20 @@ A service catalogue with basic support for filtering sorting and pagination
 
 
 ## Features Included
-- [x] List of services with name, description & versions.
-- [x] Ability to fetch single service and version
-- [x] Fuzzy search on name and description
-- [x] Pagination. Caveat [explained](#2-fuzzy-search-sorting-filtering-version-fetching--pagination)
-- [x] Request Validation
-- [x] Graceful Shutdown and health checks
-- [x] Panic Recovery Middleware & RequestId propagation
-- [x] Build checks
-- [x] Create and Update endpoints
-- [ ] Migration File
-- [ ] Seeding File
-- [ ] Unit & Integration Tests
-- [ ] DockerFile and application containerization
+- [x] :feelsgood: List of services with name, description & versions.
+- [x] :feelsgood: Ability to fetch single service and version
+- [x] :feelsgood: Fuzzy search on name and description
+- [x] :feelsgood: Pagination. Caveat [explained](#2-fuzzy-search-sorting-filtering-version-fetching--pagination)
+- [x] :feelsgood: Request Validation
+- [x] :feelsgood: Graceful Shutdown and health checks
+- [x] :feelsgood: Panic Recovery Middleware & RequestId propagation
+- [x] :feelsgood: Build checks
+- [x] :feelsgood: Create and Update endpoints
+- [ ] :hear_no_evil: Deletion or better soft deletes
+- [ ] :hear_no_evil: Migration File
+- [ ] :hear_no_evil: Seeding File
+- [ ] :hear_no_evil: Unit & Integration Tests
+- [ ] :hear_no_evil: DockerFile and application containerization
 
 ## Technical Specification
 The service catalogue has three major components:
