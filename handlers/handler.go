@@ -192,11 +192,17 @@ func (h *Handler) UpdateSvcCatalogue(c *gin.Context) {
 			CreatedAt:   resp.CreatedAt,
 			UpdatedAt:   resp.UpdatedAt,
 			CreatedBy:   resp.CreatedBy,
-			UpdatedBy:   resp.UpdatedBy,
+			UpdatedBy:   serviceCatalogueReq.UpdatedBy,
 		},
 		TimeStamp: time.Now().Format(time.RFC3339),
 	}
-	c.JSON(http.StatusCreated, serviceCatalogueResp)
+	if serviceCatalogueReq.Name != "" {
+		serviceCatalogueResp.Name = serviceCatalogueReq.Name
+	}
+	if serviceCatalogueReq.Description != "" {
+		serviceCatalogueResp.Description = serviceCatalogueReq.Description
+	}
+	c.JSON(http.StatusOK, serviceCatalogueResp)
 }
 
 func (h *Handler) FetchServiceById(c *gin.Context) {

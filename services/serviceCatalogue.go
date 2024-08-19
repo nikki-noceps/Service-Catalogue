@@ -113,8 +113,8 @@ func (svc *Service) UpdateServiceCatalogue(cctx context.CustomContext, input *Se
 		Name:            svcCat.Name,
 		Description:     svcCat.Description,
 		Version:         svcCat.Version,
-		CreatedAt:       svcCat.CreatedAt,
-		CreatedBy:       svcCat.CreatedBy,
+		CreatedAt:       svcCat.UpdatedAt,
+		CreatedBy:       svcCat.UpdatedBy,
 		DecomissionedBy: input.UpdatedBy,
 	}
 

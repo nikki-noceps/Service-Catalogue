@@ -26,7 +26,7 @@ type (
 
 	ServiceCatalogueVersion struct {
 		ParentId        string `json:"parentId,omitempty" mapstructure:"parentId,omitempty"`
-		VersionId       string `json:"versionId,omitempty" mapstructure:"versionsId,omitempty"`
+		VersionId       string `json:"versionId,omitempty" mapstructure:"versionId,omitempty"`
 		Name            string `json:"name,omitempty" mapstructure:"name,omitempty"`
 		Description     string `json:"description,omitempty" mapstructure:"description,omitempty"`
 		Version         int    `json:"version,omitempty" mapstructure:"version,omitempty"`

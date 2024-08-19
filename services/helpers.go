@@ -84,7 +84,7 @@ func (svc *Service) searchAndFetchServiceCatalogueVersions(cctx context.CustomCo
 // fetchServiceCatalogueVersion looks up a specific versionId provided in body
 // Parses the response and fetches _source from hits.hits and tranforms to service catalogue versions list
 func (svc *Service) fetchServiceCatalogueVersion(cctx context.CustomContext, body *database.Body) (*ServiceCatalogueVersion, error) {
-	hits, err := svc.esClient.SearchAndGetHits(cctx, body, database.ServiceCatalogueIndex)
+	hits, err := svc.esClient.SearchAndGetHits(cctx, body, database.ServiceCatalogueVersionIndex)
 	if err != nil {
 		cctx.Logger().DEBUG("failed to search", tag.NewErrorTag(err))
 		return nil, fmt.Errorf("failed to search: %w", err)
