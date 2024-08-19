@@ -19,6 +19,7 @@ import (
 var (
 	userRequestHeader     = "x-user-id"
 	keyServiceIdPathParam = "serviceId"
+	keyVersionIdPathParam = "versionId"
 )
 
 type Handler struct {
@@ -87,7 +88,7 @@ func (h *Handler) ListSvcCatalogue(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.Svc.ListAllService(cctx, listParams)
+	resp, err := h.Svc.ListAllServices(cctx, listParams)
 	if err != nil {
 		cctx.Logger().ERROR("SERVICE_ERROR", tag.NewErrorTag(err))
 		c.Status(http.StatusInternalServerError)
@@ -149,7 +150,53 @@ func (h *Handler) CreateSvcCatalogue(c *gin.Context) {
 }
 
 func (h *Handler) UpdateSvcCatalogue(c *gin.Context) {
+	cctx := context.CustomContextFromContext(c.Request.Context())
 
+	serviceId := c.Param(keyServiceIdPathParam)
+
+	serviceCatalogueReq := &services.UpdateServiceCatalogueRequest{
+		ServiceId: serviceId,
+	}
+	err := c.ShouldBindJSON(serviceCatalogueReq)
+	if err != nil {
+		cctx.Logger().ERROR("REQUEST_PARSING_FAILED", tag.NewErrorTag(err))
+		c.Status(http.StatusBadRequest)
+		_ = c.Error(err)
+		return
+	}
+
+	serviceCatalogueReq.UpdatedBy = c.GetHeader(userRequestHeader)
+
+	if err := serviceCatalogueReq.Validate(); err != nil {
+		cctx.Logger().ERROR("VALIDATION_FAILED", tag.NewErrorTag(err))
+		c.Status(http.StatusBadRequest)
+		_ = c.Error(err)
+		return
+	}
+
+	svcCatalogue := serviceCatalogueReq.RequestStructToServiceStruct(cctx)
+	resp, err := h.Svc.UpdateServiceCatalogue(cctx, svcCatalogue)
+	if err != nil {
+		cctx.Logger().ERROR("SERVICE_ERROR", tag.NewErrorTag(err))
+		c.Status(http.StatusBadRequest)
+		_ = c.Error(err)
+		return
+	}
+
+	serviceCatalogueResp := &services.UpdateServiceCatalogueResponse{
+		ServiceCatalogueResponse: &services.ServiceCatalogueResponse{
+			ServiceId:   resp.ServiceId,
+			Name:        resp.Name,
+			Description: resp.Description,
+			Version:     resp.Version,
+			CreatedAt:   resp.CreatedAt,
+			UpdatedAt:   resp.UpdatedAt,
+			CreatedBy:   resp.CreatedBy,
+			UpdatedBy:   resp.UpdatedBy,
+		},
+		TimeStamp: time.Now().Format(time.RFC3339),
+	}
+	c.JSON(http.StatusCreated, serviceCatalogueResp)
 }
 
 func (h *Handler) FetchServiceById(c *gin.Context) {
@@ -260,4 +307,26 @@ func generateListResponseFromDBResponse(resp []*services.ServiceCatalogue) *serv
 		TimeStamp:   time.Now().UTC().Format(time.RFC3339),
 	}
 	return searchRespones
+}
+
+func generateVersionListFromDBResponse(resp []*services.ServiceCatalogueVersion) *services.ListServiceCatalogueVersionsResponse {
+	versionsList := []*services.ServiceCatalogueVersionResponse{}
+	for _, serviceCatVersion := range resp {
+		versionsList = append(versionsList, &services.ServiceCatalogueVersionResponse{
+			ParentId:        serviceCatVersion.ParentId,
+			VersionId:       serviceCatVersion.VersionId,
+			Name:            serviceCatVersion.Name,
+			Description:     serviceCatVersion.Description,
+			Version:         serviceCatVersion.Version,
+			CreatedAt:       serviceCatVersion.CreatedAt,
+			DecomissionedAt: serviceCatVersion.DecomissionedAt,
+			CreatedBy:       serviceCatVersion.CreatedBy,
+			DecomissionedBy: serviceCatVersion.DecomissionedBy,
+		})
+	}
+	searchResponse := &services.ListServiceCatalogueVersionsResponse{
+		ServiceVersionsList: versionsList,
+		TimeStamp:           time.Now().UTC().Format(time.RFC3339),
+	}
+	return searchResponse
 }

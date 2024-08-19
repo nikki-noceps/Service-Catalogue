@@ -84,5 +84,10 @@ type (
 	ScriptQuery struct {
 		Script string `json:"script"`
 	}
+
 	SortField map[string]SortOrder
+
+	UpdateBody struct {
+		Doc map[string]any `json:"doc,omitempty"`
+	}
 )

@@ -121,5 +121,30 @@ func (es *ESClient) CreateDocument(cctx context.CustomContext, docBytes []byte, 
 		return nil, fmt.Errorf("create failed, got [%s] status code %v", res.Status(), e)
 	}
 
+	defer res.Body.Close()
+
+	return res, nil
+}
+
+// UpdateDocument takes in bytes to be replaced for the documentId provided. It only updates parts of the document given in inputs
+// Does not update rest of the fields which are not provided.
+func (es *ESClient) UpdateDocument(cctx context.CustomContext, docBytes []byte, index string, docId string) (*esapi.Response, error) {
+	res, err := es.client.Update(index, docId, bytes.NewReader(docBytes), es.client.Update.WithContext(cctx))
+	if err != nil {
+		cctx.Logger().DEBUG("failed to update document", tag.NewErrorTag(err))
+		return nil, fmt.Errorf("failed to update document: %w", err)
+	}
+
+	defer res.Body.Close()
+
+	if res.IsError() {
+		cctx.Logger().DEBUG("updated failed", tag.NewAnyTag("res", res.String()))
+		var e map[string]any
+		if err := json.NewDecoder(res.Body).Decode(&e); err != nil {
+			return nil, fmt.Errorf("error parsing the response body: %w", err)
+		}
+		return nil, fmt.Errorf("update failed, got [%s] status code %v", res.Status(), e)
+	}
+
 	return res, nil
 }

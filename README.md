@@ -7,7 +7,7 @@ A service catalogue with basic support for filtering sorting and pagination
 - [User Stories](https://docs.google.com/document/d/1mSUxHGgqKK7xKgIBs9irV_5po_tuqZrHvSRJZ6LhzrU/edit)
 - [Figma](https://www.figma.com/design/zeaWiePnc3OCe34I4oZbzN/Service-Card-List?node-id=0-1&t=dnxSHj6txsZ4x4Is-0)
 - [Technical Specification](#technical-specification)
-- [Postman Collection]()
+- [Postman Collection](https://api.postman.com/collections/37722834-94e0d2f9-e65d-4e35-b5a8-310dcf21fc02?access_key=PMAT-01J5NN4SE7HJZXKA6N3M7EXGRX)
 
 
 ## Technical Specification
@@ -40,16 +40,18 @@ The document structure will look as such
     "name": "Test",     // user input
     "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit", // user input
     "createdAt": "2019-11-14T00:55:31.820Z", // ISO-8601 format in UTC to avoid timezone issues
-    "updatedAt": "2019-11-15T12:76:21.820Z", // Same as createdAt
+    "decomissionedAt": "2020-11-15T13:76:21.820Z", // whenever this version was replaced by a new one
     "version": 1,  // stores the version
     "createdBy": "", // for user information not part of current scope
-    "updatedBy": "" // for user information not part of current scope
+    "decomissionedBy": "" // store the user who replaced this version
 }
 ```
 
 The version document is linked to the `servicecatalogue` document via the `parentId` field which is the same as the `documentId` field in `servicecatalogue`.
 
-This version document shall be created on every update or new service catalogue creation. It will simply be copied during creation of new service or copied from current services in case of updates in services.
+This version document shall be created on every update . It will simply be copied during creation of new service or copied from current services in case of updates in services.
+
+> **_NOTE:_** The versions are historical versions and does not store the current version in this index
 
 #### 2. Fuzzy search, sorting, filtering, version fetching & pagination
 Fuzzy Search is an inbuilt feature in elasticsearch and also available on [multiple fields](https://www.elastic.co/guide/en/elasticsearch/guide/current/fuzzy-match-query.html). It will allow us to search on both the name and description of the services. 
