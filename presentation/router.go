@@ -58,4 +58,7 @@ func setupRoutes(ctx context.Context, router *gin.Engine, handler *handlers.Hand
 	router.POST("/serviceCatalogue", handler.CreateSvcCatalogue)
 	router.GET("/serviceCatalogue/search", handler.SearchSvcCatalogue)
 	router.GET("/serviceCatalogue/:serviceId", handler.FetchServiceById)
+	router.PATCH("/serviceCatalogue/:serviceId", handler.UpdateSvcCatalogue)
+	router.GET("/serviceCatalogue/:serviceId/versions", handler.ListServiceCatalogueVersions)
+	router.GET("/serviceCatalogue/versions/:versionId", handler.FetchServiceCatalogueVersionById)
 }

@@ -6,7 +6,7 @@ import (
 	"nikki-noceps/serviceCatalogue/database"
 	"time"
 
-	validation "github.com/go-ozzo/ozzo-validation"
+	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/google/uuid"
 )
 
@@ -14,26 +14,26 @@ type (
 	SortOrder string
 
 	ServiceCatalogue struct {
-		ServiceId   string `json:"serviceId" mapstructure:"serviceId"`
-		Name        string `json:"name" mapstructure:"name"`
-		Description string `json:"description" mapstructure:"description"`
-		Version     int    `json:"version" mapstructure:"version"`
-		CreatedAt   string `json:"createdAt" mapstructure:"createdAt"`
-		UpdatedAt   string `json:"updatedAt" mapstructure:"updatedAt"`
-		CreatedBy   string `json:"createdBy" mapstructure:"createdBy"`
-		UpdatedBy   string `json:"updatedBy" mapstructure:"updatedBy"`
+		ServiceId   string `json:"serviceId,omitempty" mapstructure:"serviceId,omitempty"`
+		Name        string `json:"name,omitempty" mapstructure:"name,omitempty"`
+		Description string `json:"description,omitempty" mapstructure:"description,omitempty"`
+		Version     int    `json:"version,omitempty" mapstructure:"version,omitempty"`
+		CreatedAt   string `json:"createdAt,omitempty" mapstructure:"createdAt,omitempty"`
+		UpdatedAt   string `json:"updatedAt,omitempty" mapstructure:"updatedAt,omitempty"`
+		CreatedBy   string `json:"createdBy,omitempty" mapstructure:"createdBy,omitempty"`
+		UpdatedBy   string `json:"updatedBy,omitempty" mapstructure:"updatedBy,omitempty"`
 	}
 
-	ServiceCatalogueVersions struct {
-		ParentId    string `json:"parentId"`
-		VersionId   string `json:"versionId"`
-		Name        string `json:"name" mapstructure:"name"`
-		Description string `json:"description" mapstructure:"description"`
-		Version     int    `json:"version" mapstructure:"version"`
-		CreatedAt   string `json:"createdAt" mapstructure:"createdAt"`
-		UpdatedAt   string `json:"updatedAt" mapstructure:"updatedAt"`
-		CreatedBy   string `json:"createdBy" mapstructure:"createdBy"`
-		UpdatedBy   string `json:"updatedBy" mapstructure:"updatedBy"`
+	ServiceCatalogueVersion struct {
+		ParentId        string `json:"parentId,omitempty" mapstructure:"parentId,omitempty"`
+		VersionId       string `json:"versionId,omitempty" mapstructure:"versionId,omitempty"`
+		Name            string `json:"name,omitempty" mapstructure:"name,omitempty"`
+		Description     string `json:"description,omitempty" mapstructure:"description,omitempty"`
+		Version         int    `json:"version,omitempty" mapstructure:"version,omitempty"`
+		CreatedAt       string `json:"createdAt,omitempty" mapstructure:"createdAt,omitempty"`
+		DecomissionedAt string `json:"decomissionedAt,omitempty" mapstructure:"decomissionedAt,omitempty"`
+		CreatedBy       string `json:"createdBy,omitempty" mapstructure:"createdBy,omitempty"`
+		DecomissionedBy string `json:"decomissionedBy,omitempty" mapstructure:"decomissionedBy,omitempty"`
 	}
 
 	Query struct {
@@ -64,7 +64,18 @@ type (
 		CreatedBy   string `json:"-"`
 	}
 
+	UpdateServiceCatalogueRequest struct {
+		Name        string `json:"name"`
+		Description string `json:"description"`
+		UpdatedBy   string `json:"-"`
+		ServiceId   string `json:"-"`
+	}
+
 	CreateServiceCatalogueResponse struct {
+		*ServiceCatalogueResponse `json:"serviceCatalogue"`
+		TimeStamp                 string `json:"timestamp"`
+	}
+	UpdateServiceCatalogueResponse struct {
 		*ServiceCatalogueResponse `json:"serviceCatalogue"`
 		TimeStamp                 string `json:"timestamp"`
 	}
@@ -83,9 +94,26 @@ type (
 		UpdatedBy   string `json:"updatedBy"`
 	}
 
+	ServiceCatalogueVersionResponse struct {
+		ParentId        string `json:"parentId,omitempty"`
+		VersionId       string `json:"versionId,omitempty"`
+		Name            string `json:"name,omitempty"`
+		Description     string `json:"description,omitempty"`
+		Version         int    `json:"version,omitempty"`
+		CreatedAt       string `json:"createdAt,omitempty"`
+		DecomissionedAt string `json:"decomissionedAt,omitempty"`
+		CreatedBy       string `json:"createdBy,omitempty"`
+		DecomissionedBy string `json:"decomissionedBy,omitempty"`
+	}
+
 	ListServiceCatalogueResponse struct {
 		ServiceList []*ServiceCatalogueResponse `json:"serviceList"`
 		TimeStamp   string                      `json:"timestamp"`
+	}
+
+	ListServiceCatalogueVersionsResponse struct {
+		ServiceVersionsList []*ServiceCatalogueVersionResponse `json:"versions"`
+		TimeStamp           string                             `json:"timestamp"`
 	}
 )
 
@@ -147,7 +175,16 @@ func (c *CreateServiceCatalogueRequest) Validate() error {
 	return validation.ValidateStruct(c,
 		validation.Field(&c.Name, validation.Required, validation.Length(4, 20)),
 		validation.Field(&c.Description, validation.Required, validation.Length(20, 200)),
-		validation.Field(&c.CreatedBy, validation.Required.Error("missing `x-user-id` header ")),
+		validation.Field(&c.CreatedBy, validation.Required.Error("missing `x-user-id` header")),
+	)
+}
+
+func (c *UpdateServiceCatalogueRequest) Validate() error {
+	return validation.ValidateStruct(c,
+		validation.Field(&c.Name, validation.When(c.Description == "", validation.Required)),
+		validation.Field(&c.Description, validation.When(c.Name == "", validation.Required)),
+		validation.Field(&c.UpdatedBy, validation.Required.Error("missing `x-user-id` header")),
+		validation.Field(&c.ServiceId, validation.Required),
 	)
 }
 
@@ -162,5 +199,16 @@ func (svcReq *CreateServiceCatalogueRequest) RequestStructToServiceStruct(cctx c
 		UpdatedAt:   now,
 		CreatedBy:   svcReq.CreatedBy,
 		UpdatedBy:   svcReq.CreatedBy,
+	}
+}
+
+func (svcReq *UpdateServiceCatalogueRequest) RequestStructToServiceStruct(cctx context.CustomContext) *ServiceCatalogue {
+	now := time.Now().UTC().Format(time.RFC3339)
+	return &ServiceCatalogue{
+		ServiceId:   svcReq.ServiceId,
+		Name:        svcReq.Name,
+		Description: svcReq.Description,
+		UpdatedAt:   now,
+		UpdatedBy:   svcReq.UpdatedBy,
 	}
 }
