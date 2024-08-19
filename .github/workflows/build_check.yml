@@ -1,0 +1,14 @@
+name: Go build checks
+on:
+  pull_request:
+    types: [opened, edited, reopened, labeled, synchronize]
+    branches:
+    - main
+jobs:
+  buildable:
+    name: go build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: build
+        run: CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o service_catalogue ./main.go
