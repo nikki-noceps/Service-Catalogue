@@ -10,6 +10,21 @@ A service catalogue with basic support for filtering sorting and pagination
 - [Postman Collection](https://api.postman.com/collections/37722834-94e0d2f9-e65d-4e35-b5a8-310dcf21fc02?access_key=PMAT-01J5NN4SE7HJZXKA6N3M7EXGRX)
 
 
+## Features Included
+- [x] List of services with name, description & versions.
+- [x] Ability to fetch single service and version
+- [x] Fuzzy search on name and description
+- [x] Pagination. Caveat [explained](#2-fuzzy-search-sorting-filtering-version-fetching--pagination)
+- [x] Request Validation
+- [x] Graceful Shutdown and health checks
+- [x] Panic Recovery Middleware & RequestId propagation
+- [x] Build checks
+- [x] Create and Update endpoints
+- [ ] Migration File
+- [ ] Seeding File
+- [ ] Unit & Integration Tests
+- [ ] DockerFile and application containerization
+
 ## Technical Specification
 The service catalogue has three major components:
 
@@ -58,7 +73,7 @@ Fuzzy Search is an inbuilt feature in elasticsearch and also available on [multi
 Also elasticsearch has inbuilt queries for sorting and filtering for documents based on timestamp ranges and pagination support.
 As for fetching the latest versions of documents in the list all queries, we can aggregate on version and fetch top hits by 
 descending sort on version.
-As for pagination based on our requirements, increasing the `from` parameter should suffice.
+As for pagination based on our requirements, increasing the `from` parameter should suffice. Application has a hard limit of from set at 1000.
 
 > **_NOTE:_**  from suffices to our pagination use case since we are showing only a handful of results on the catalogue page. For a full fledged pagination refer [search after](https://www.elastic.co/guide/en/elasticsearch/reference/current/paginate-search-results.html#search-after) which should be used for pagination at scale roughly if the document count exceeds 5000.
 
