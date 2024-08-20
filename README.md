@@ -20,7 +20,10 @@ A service catalogue with basic support for filtering sorting and pagination
 - [x] :feelsgood: Panic Recovery Middleware & RequestId propagation
 - [x] :feelsgood: Build checks
 - [x] :feelsgood: CRUD endpoints
+- [x] :feelsgood: Soft deletes
 - [x] :feelsgood: Migration File
+- [x] :feelsgood: Cross Origin Resource Sharing (CORS) middleware
+- [x] :feelsgood: Custom Context
 - [x] :see_no_evil: Poor Man Basic Authentication. All non GET api's have a basic authentication check
 - [ ] :hear_no_evil: Seeding File
 - [ ] :hear_no_evil: Unit & Integration Tests
@@ -35,7 +38,7 @@ The catalogue will be organization agnostic. To make the catalogue specific to o
 The document will look as such in `servicecatalogue` index
 ```json
 {
-    "documentId": "25ef909a-b7c6-4d9c-9d38-ab9e10fdc686",   // uuid auto-generated 
+    "serviceId": "25ef909a-b7c6-4d9c-9d38-ab9e10fdc686",   // uuid auto-generated 
     "name": "Test",     // user input
     "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit", // user input
     "createdAt": "2019-11-14T00:55:31.820Z", // ISO-8601 format in UTC to avoid timezone issues
@@ -45,9 +48,11 @@ The document will look as such in `servicecatalogue` index
     "updatedBy": "" // for user information not part of current scope
 }
 ```
+The `serviceId` field is a unique identifier for services in the catalogue. 
+The `version` field shows latest version of the service. Inherently shows total versions available
 
-<!-- A custom versioning strategy will be used to enable fetching of historical version. An extra field version will be added to the document and stores in the same index. Updates will simple create a copy of the document with updated fields and version. Since this is a service catalogue versions of a document is not expected to be large but for large volumes of versioned documents, we can consider moving older versions to a different index to optimize performance. -->
-Another index called `servicecatalogueversions` will be created to keep track of versions of a service catalogue
+
+Another index called `servicecatalogueversions` will be created to keep track of versions of a service catalogue. This index will be similar to an archive storage and will only store historical versions of a service. The current live version will not reside in this index.
 The document structure will look as such
 ```json
 {
@@ -63,9 +68,11 @@ The document structure will look as such
 }
 ```
 
-The version document is linked to the `servicecatalogue` document via the `parentId` field which is the same as the `documentId` field in `servicecatalogue`.
+The `parentId` field links all the historical versions to the live document in servicecatalogue index
+The `versionId` field is a unique identifier for each document.
+The `decomissioned` fields store information related to when this version was put into archival and by whom.
 
-This version document shall be created on every update . It will simply be copied during creation of new service or copied from current services in case of updates in services.
+This version document shall be created on every update or when the live one is deleted from servicecatalogue index. 
 
 > **_NOTE:_** The versions are historical versions and does not store the current version in this index
 
