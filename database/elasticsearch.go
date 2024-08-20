@@ -148,3 +148,21 @@ func (es *ESClient) UpdateDocument(cctx context.CustomContext, docBytes []byte, 
 
 	return res, nil
 }
+
+func (es *ESClient) DeleteDocument(cctx context.CustomContext, index string, docId string) error {
+	res, err := es.client.Delete(index, docId)
+	if err != nil {
+		cctx.Logger().DEBUG("failed to delete document", tag.NewErrorTag(err))
+		return fmt.Errorf("failed to delete document: %w", err)
+	}
+	defer res.Body.Close()
+	if res.IsError() {
+		cctx.Logger().DEBUG("delete failed", tag.NewAnyTag("res", res.String()))
+		var e map[string]any
+		if err := json.NewDecoder(res.Body).Decode(&e); err != nil {
+			return fmt.Errorf("error parsing the response body: %w", err)
+		}
+		return fmt.Errorf("delete failed, got [%s] status code %v", res.Status(), e)
+	}
+	return nil
+}

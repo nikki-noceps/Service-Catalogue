@@ -3,11 +3,14 @@ package main
 import (
 	"context"
 	"errors"
+	"flag"
 	"fmt"
+	"log"
 	"net/http"
 	"nikki-noceps/serviceCatalogue/config"
 	"nikki-noceps/serviceCatalogue/logger"
 	"nikki-noceps/serviceCatalogue/logger/tag"
+	"nikki-noceps/serviceCatalogue/migrations"
 	"nikki-noceps/serviceCatalogue/presentation"
 	"nikki-noceps/serviceCatalogue/services"
 	"os"
@@ -22,6 +25,11 @@ import (
 func main() {
 	// https://www.reddit.com/r/golang/comments/199954n/what_is_gomaxprocs_actually_used_for/
 	runtime.GOMAXPROCS(runtime.NumCPU())
+
+	runMigration := flag.Bool("migrate", false, "Whether to run the index migration")
+
+	// Parse the flags
+	flag.Parse()
 
 	// Graceful shutdown
 	c := make(chan os.Signal, 1)
@@ -49,6 +57,17 @@ func main() {
 		logger.FATAL("failed to create service", tag.NewErrorTag(err))
 		return
 	}
+
+	// Check if the migration flag is set
+	if *runMigration {
+		err := migrations.RunMigrations(ctx, cfg)
+		if err != nil {
+			log.Fatalf("Error migrating index: %s", err)
+		}
+		cancel()
+		return
+	}
+
 	router, err := presentation.NewRouter(ctx, cfg, svc)
 	if err != nil {
 		logger.FATAL("failed to create router", tag.NewErrorTag(err))

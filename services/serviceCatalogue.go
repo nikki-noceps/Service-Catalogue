@@ -53,6 +53,47 @@ func (svc *Service) FetchServiceById(cctx context.CustomContext, serviceId strin
 	return svc.mapToServiceCatalogue(cctx, hitMap)
 }
 
+func (svc *Service) DeleteService(cctx context.CustomContext, serviceId string, userId string) error {
+	body := &database.Body{
+		Query: &database.Query{
+			Term: &database.TermQuery{
+				keyServiceId: {
+					Value: serviceId,
+				},
+			},
+		},
+	}
+
+	hitMap, err := svc.searchAndFetchServiceCatalogue(cctx, body)
+	if err != nil {
+		return err
+	}
+
+	svcCat, err := svc.mapToServiceCatalogue(cctx, hitMap)
+	if err != nil {
+		return err
+	}
+
+	svcCatVersion := &ServiceCatalogueVersion{
+		ParentId:        svcCat.ServiceId,
+		VersionId:       uuid.NewString(),
+		Name:            svcCat.Name,
+		Description:     svcCat.Description,
+		Version:         svcCat.Version,
+		CreatedAt:       svcCat.UpdatedAt,
+		CreatedBy:       svcCat.CreatedBy,
+		DecomissionedBy: userId,
+	}
+
+	_, err = svc.CreateServiceCatalogueVersion(cctx, svcCatVersion)
+	if err != nil {
+		return err
+	}
+
+	err = svc.deleteServiceCatalogue(cctx, hitMap["_id"].(string))
+	return err
+}
+
 func (svc *Service) FuzzySearchService(cctx context.CustomContext, searchParams *SearchParameters) ([]*ServiceCatalogue, error) {
 	body := &database.Body{
 		Query: &database.Query{

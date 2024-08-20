@@ -41,6 +41,7 @@ func NewRouter(ctx context.Context, cfg *config.Configuration, svc *services.Ser
 		loggerMiddleware(),
 		ErrorMiddleware,
 		PanicRecovery(),
+		PoorMansBasicAuthenticationMiddleware,
 	)
 	setupRoutes(ctx, router, handlers.NewHandler(svc))
 	return router, nil
@@ -59,6 +60,7 @@ func setupRoutes(ctx context.Context, router *gin.Engine, handler *handlers.Hand
 	router.GET("/serviceCatalogue/search", handler.SearchSvcCatalogue)
 	router.GET("/serviceCatalogue/:serviceId", handler.FetchServiceById)
 	router.PATCH("/serviceCatalogue/:serviceId", handler.UpdateSvcCatalogue)
+	router.DELETE("/serviceCatalogue/:serviceId", handler.DeleteService)
 	router.GET("/serviceCatalogue/:serviceId/versions", handler.ListServiceCatalogueVersions)
 	router.GET("/serviceCatalogue/versions/:versionId", handler.FetchServiceCatalogueVersionById)
 }

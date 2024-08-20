@@ -101,6 +101,7 @@ func (h *Handler) ListSvcCatalogue(c *gin.Context) {
 	c.JSON(http.StatusOK, searchResponse)
 }
 
+// CreateSvcCatalogue creates a service document in servicecatalogue index
 func (h *Handler) CreateSvcCatalogue(c *gin.Context) {
 	cctx := context.CustomContextFromContext(c.Request.Context())
 
@@ -149,6 +150,8 @@ func (h *Handler) CreateSvcCatalogue(c *gin.Context) {
 	c.JSON(http.StatusCreated, serviceCatalogueResp)
 }
 
+// UpdateSvcCatalogue updates the elasticsearch document and stores the older document as a version in another
+// index called servicecatalogueversion
 func (h *Handler) UpdateSvcCatalogue(c *gin.Context) {
 	cctx := context.CustomContextFromContext(c.Request.Context())
 
@@ -205,6 +208,29 @@ func (h *Handler) UpdateSvcCatalogue(c *gin.Context) {
 	c.JSON(http.StatusOK, serviceCatalogueResp)
 }
 
+// DeleteService deletes document from servicecatalogue index but also stores a copy in the servicecatalogueversion index
+func (h *Handler) DeleteService(c *gin.Context) {
+	cctx := context.CustomContextFromContext(c.Request.Context())
+
+	serviceId := c.Param(keyServiceIdPathParam)
+	userId := c.GetHeader(userRequestHeader)
+
+	err := h.Svc.DeleteService(cctx, serviceId, userId)
+	if err != nil {
+		cctx.Logger().ERROR("SERVICE_ERROR", tag.NewErrorTag(err))
+		if errors.Is(err, services.NoDocumentFoundErr) {
+			c.Status(http.StatusBadRequest)
+			_ = c.Error(err)
+			return
+		}
+		c.Status(http.StatusInternalServerError)
+		_ = c.Error(err)
+		return
+	}
+	c.JSON(http.StatusAccepted, nil)
+}
+
+// FetchServiceById fetches a single document from servicecatalogue index
 func (h *Handler) FetchServiceById(c *gin.Context) {
 	cctx := context.CustomContextFromContext(c.Request.Context())
 

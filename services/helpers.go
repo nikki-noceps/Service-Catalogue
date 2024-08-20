@@ -107,6 +107,10 @@ func (svc *Service) fetchServiceCatalogueVersion(cctx context.CustomContext, bod
 	return svcCat, nil
 }
 
+func (svc *Service) deleteServiceCatalogue(cctx context.CustomContext, docId string) error {
+	return svc.esClient.DeleteDocument(cctx, database.ServiceCatalogueIndex, docId)
+}
+
 // parses hits["_source"] received from es to service catalogue response
 func (svc *Service) mapToServiceCatalogue(cctx context.CustomContext, hitmap map[string]any) (*ServiceCatalogue, error) {
 	svcCat := &ServiceCatalogue{}
