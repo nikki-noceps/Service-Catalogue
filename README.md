@@ -11,8 +11,8 @@ A service catalogue with basic support for filtering sorting and pagination
 
 
 ## Features Included
-- [x] :feelsgood: List of services with name, description & versions.
-- [x] :feelsgood: Ability to fetch single service and version
+- [x] :feelsgood: Listing services with sort, filter and versions available. Also fetch all versions
+- [x] :feelsgood: Ability to fetch single service and specific version
 - [x] :feelsgood: Fuzzy search on name and description
 - [x] :feelsgood: Pagination. Caveat [explained](#2-fuzzy-search-sorting-filtering-version-fetching--pagination)
 - [x] :feelsgood: Request Validation
@@ -21,7 +21,7 @@ A service catalogue with basic support for filtering sorting and pagination
 - [x] :feelsgood: Build checks
 - [x] :feelsgood: CRUD endpoints
 - [x] :feelsgood: Migration File
-- [x] :see_no_evil: Poor Man Basic Authentication. All non GET api's have a basic authentication check 
+- [x] :see_no_evil: Poor Man Basic Authentication. All non GET api's have a basic authentication check
 - [ ] :hear_no_evil: Seeding File
 - [ ] :hear_no_evil: Unit & Integration Tests
 - [ ] :hear_no_evil: DockerFile and application containerization
