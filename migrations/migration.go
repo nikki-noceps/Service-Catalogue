@@ -47,12 +47,12 @@ func createIndex(ctx context.Context, es *es.Client, index string, mapping []byt
 	}
 	res, err := req.Do(ctx, es)
 	if err != nil {
-		return fmt.Errorf("Error creating or updating index: %s", err)
+		return fmt.Errorf("error creating or updating index: %s", err)
 	}
 	defer res.Body.Close()
 
 	if res.IsError() {
-		return fmt.Errorf("Error creating or updating index: %s", res.Status())
+		return fmt.Errorf("error creating or updating index: %s", res.Status())
 	}
 
 	logger.INFO("Index Created !!", tag.NewAnyTag("index", index))
