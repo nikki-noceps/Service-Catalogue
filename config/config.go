@@ -7,6 +7,11 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+var (
+	Username string = "balrog"
+	Password string = "youshallnotpass"
+)
+
 type (
 	Configuration struct {
 		App           App           `yaml:"App"`

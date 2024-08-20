@@ -1,8 +1,10 @@
 package presentation
 
 import (
+	"encoding/base64"
 	"fmt"
 	"net/http"
+	"nikki-noceps/serviceCatalogue/config"
 	"nikki-noceps/serviceCatalogue/context"
 	"nikki-noceps/serviceCatalogue/logger"
 	"nikki-noceps/serviceCatalogue/logger/tag"
@@ -133,4 +135,42 @@ func PanicRecovery() gin.HandlerFunc {
 		c.JSON(http.StatusInternalServerError, nil)
 	}
 	return nice.Recovery(panicHandler)
+}
+
+// PoorMansBasicAuthenticationMiddleware is a simple basic auth middleware with hard coded credentials
+// This is not a recommended way to authenticate requests, see [Authentication](https://github.com/nikki-noceps/serviceCatalogue/tree/main/docs)
+// Rejects all non GET requests if authentication header is missing.
+// Only accepts Basic authentication
+func PoorMansBasicAuthenticationMiddleware(c *gin.Context) {
+	authHeader := c.GetHeader("Authorization")
+
+	if authHeader == "" && c.Request.Method != http.MethodGet {
+		c.Header("WWW-Authenticate", `Basic realm="Restricted"`)
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	// Check if the header starts with "Basic "
+	if !strings.HasPrefix(authHeader, "Basic ") {
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	// Extract and decode the base64-encoded credentials
+	encodedCredentials := strings.TrimPrefix(authHeader, "Basic ")
+	credentials, err := base64.StdEncoding.DecodeString(encodedCredentials)
+	if err != nil {
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	// Split credentials into username and password
+	parts := strings.SplitN(string(credentials), ":", 2)
+	if len(parts) != 2 || parts[0] != config.Username || parts[1] != config.Password {
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	// If authentication is successful, call the next handler
+	c.Next()
 }

@@ -19,9 +19,9 @@ A service catalogue with basic support for filtering sorting and pagination
 - [x] :feelsgood: Graceful Shutdown and health checks
 - [x] :feelsgood: Panic Recovery Middleware & RequestId propagation
 - [x] :feelsgood: Build checks
-- [x] :feelsgood: Create and Update endpoints
-- [ ] :hear_no_evil: Deletion or better soft deletes
-- [ ] :hear_no_evil: Migration File
+- [x] :feelsgood: CRUD endpoints
+- [x] :feelsgood: Migration File
+- [x] :see_no_evil: Poor Man Basic Authentication. All non GET api's have a basic authentication check 
 - [ ] :hear_no_evil: Seeding File
 - [ ] :hear_no_evil: Unit & Integration Tests
 - [ ] :hear_no_evil: DockerFile and application containerization
@@ -86,8 +86,24 @@ However for the scope of this project we shall put in place a middleware which d
 
 
 ### Running the Application
+Ensure to install docker and keep docker daemon running
 
-### Testing
+Then run the below command in terminal
+```
+make all
+```
+
+This will bring up an elasticsearch container on your machine and create required indexes with required mappings. It will then proceed to run the server. Refer [Postman Collection](https://api.postman.com/collections/37722834-94e0d2f9-e65d-4e35-b5a8-310dcf21fc02?access_key=PMAT-01J5NN4SE7HJZXKA6N3M7EXGRX) for api contracts and usage.
+
+
+For future runs
+```
+go run main.go
+```
+
+will suffice
+
+>**_NOTE:_** Future runs assume you have an elasticsearch container running with required indexes created
 
 ## Production Readiness
 For more information, refer [Guide](docs/production_readiness.md)
