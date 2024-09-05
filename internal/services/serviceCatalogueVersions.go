@@ -3,8 +3,8 @@ package services
 import (
 	"encoding/json"
 	"fmt"
-	"nikki-noceps/serviceCatalogue/context"
-	"nikki-noceps/serviceCatalogue/database"
+	"nikki-noceps/serviceCatalogue/pkg/context"
+	"nikki-noceps/serviceCatalogue/pkg/database"
 	"time"
 )
 

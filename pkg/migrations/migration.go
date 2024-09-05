@@ -5,9 +5,9 @@ import (
 	"context"
 	"fmt"
 	"nikki-noceps/serviceCatalogue/config"
-	"nikki-noceps/serviceCatalogue/database"
-	"nikki-noceps/serviceCatalogue/logger"
-	"nikki-noceps/serviceCatalogue/logger/tag"
+	"nikki-noceps/serviceCatalogue/pkg/database"
+	"nikki-noceps/serviceCatalogue/pkg/logger"
+	"nikki-noceps/serviceCatalogue/pkg/logger/tag"
 
 	es "github.com/elastic/go-elasticsearch/v8"
 	"github.com/elastic/go-elasticsearch/v8/esapi"

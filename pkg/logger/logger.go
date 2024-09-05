@@ -1,7 +1,7 @@
 package logger
 
 import (
-	tag "nikki-noceps/serviceCatalogue/logger/tag"
+	tag "nikki-noceps/serviceCatalogue/pkg/logger/tag"
 	"strings"
 	"sync"
 

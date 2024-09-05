@@ -3,9 +3,9 @@ package services
 import (
 	"encoding/json"
 	"fmt"
-	"nikki-noceps/serviceCatalogue/context"
-	"nikki-noceps/serviceCatalogue/database"
-	"nikki-noceps/serviceCatalogue/logger/tag"
+	"nikki-noceps/serviceCatalogue/pkg/context"
+	"nikki-noceps/serviceCatalogue/pkg/database"
+	"nikki-noceps/serviceCatalogue/pkg/logger/tag"
 
 	"github.com/google/uuid"
 )
