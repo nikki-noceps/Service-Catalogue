@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"nikki-noceps/serviceCatalogue/config"
-	"nikki-noceps/serviceCatalogue/context"
-	"nikki-noceps/serviceCatalogue/logger/tag"
+	"nikki-noceps/serviceCatalogue/pkg/context"
+	"nikki-noceps/serviceCatalogue/pkg/logger/tag"
 
 	es "github.com/elastic/go-elasticsearch/v8"
 	"github.com/elastic/go-elasticsearch/v8/esapi"

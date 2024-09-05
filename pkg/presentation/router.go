@@ -4,9 +4,9 @@ import (
 	"context"
 	"net/http"
 	"nikki-noceps/serviceCatalogue/config"
-	"nikki-noceps/serviceCatalogue/handlers"
-	"nikki-noceps/serviceCatalogue/logger"
-	"nikki-noceps/serviceCatalogue/services"
+	"nikki-noceps/serviceCatalogue/internal/services"
+	"nikki-noceps/serviceCatalogue/pkg/handlers"
+	"nikki-noceps/serviceCatalogue/pkg/logger"
 	"strings"
 
 	"github.com/gin-gonic/gin"

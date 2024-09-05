@@ -2,9 +2,9 @@ package handlers
 
 import (
 	"net/http"
-	"nikki-noceps/serviceCatalogue/context"
-	"nikki-noceps/serviceCatalogue/logger/tag"
-	"nikki-noceps/serviceCatalogue/services"
+	"nikki-noceps/serviceCatalogue/internal/services"
+	"nikki-noceps/serviceCatalogue/pkg/context"
+	"nikki-noceps/serviceCatalogue/pkg/logger/tag"
 
 	"github.com/gin-gonic/gin"
 )

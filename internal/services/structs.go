@@ -2,8 +2,8 @@ package services
 
 import (
 	"fmt"
-	"nikki-noceps/serviceCatalogue/context"
-	"nikki-noceps/serviceCatalogue/database"
+	"nikki-noceps/serviceCatalogue/pkg/context"
+	"nikki-noceps/serviceCatalogue/pkg/database"
 	"time"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"

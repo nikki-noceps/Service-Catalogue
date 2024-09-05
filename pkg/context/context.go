@@ -1,8 +1,8 @@
 package context
 
 import (
-	"nikki-noceps/serviceCatalogue/logger"
-	"nikki-noceps/serviceCatalogue/logger/tag"
+	"nikki-noceps/serviceCatalogue/pkg/logger"
+	"nikki-noceps/serviceCatalogue/pkg/logger/tag"
 	"sync"
 	"time"
 
