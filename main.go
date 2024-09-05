@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"nikki-noceps/serviceCatalogue/config"
+	"nikki-noceps/serviceCatalogue/database"
 	"nikki-noceps/serviceCatalogue/logger"
 	"nikki-noceps/serviceCatalogue/logger/tag"
 	"nikki-noceps/serviceCatalogue/migrations"
@@ -20,6 +21,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 )
 
 func main() {
@@ -52,7 +54,13 @@ func main() {
 	}
 	logger.INFO("loaded config", tag.NewAnyTag("config", cfg))
 
-	svc, err := services.NewService(ctx, cfg)
+	esClient, err := database.InitESClient(cfg.ElasticSearch)
+	if err != nil {
+		logger.FATAL("failed to connect to Elasticsearch", tag.NewErrorTag(err))
+		return
+	}
+
+	svc, err := services.NewService(ctx, esClient)
 	if err != nil {
 		logger.FATAL("failed to create service", tag.NewErrorTag(err))
 		return
