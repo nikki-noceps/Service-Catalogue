@@ -8,12 +8,12 @@ import (
 	"log"
 	"net/http"
 	"nikki-noceps/serviceCatalogue/config"
-	"nikki-noceps/serviceCatalogue/database"
-	"nikki-noceps/serviceCatalogue/logger"
-	"nikki-noceps/serviceCatalogue/logger/tag"
-	"nikki-noceps/serviceCatalogue/migrations"
-	"nikki-noceps/serviceCatalogue/presentation"
-	"nikki-noceps/serviceCatalogue/services"
+	"nikki-noceps/serviceCatalogue/internal/services"
+	"nikki-noceps/serviceCatalogue/pkg/database"
+	"nikki-noceps/serviceCatalogue/pkg/logger"
+	"nikki-noceps/serviceCatalogue/pkg/logger/tag"
+	"nikki-noceps/serviceCatalogue/pkg/migrations"
+	"nikki-noceps/serviceCatalogue/pkg/presentation"
 	"os"
 	"os/signal"
 	"runtime"
@@ -21,7 +21,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"google.golang.org/genproto/googleapis/spanner/admin/database/v1"
 )
 
 func main() {

@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"nikki-noceps/serviceCatalogue/config"
 	"nikki-noceps/serviceCatalogue/internal/services"
+	"nikki-noceps/serviceCatalogue/pkg/database"
 	"nikki-noceps/serviceCatalogue/pkg/logger"
 	"nikki-noceps/serviceCatalogue/pkg/logger/tag"
 	"nikki-noceps/serviceCatalogue/pkg/migrations"
@@ -45,14 +46,13 @@ func main() {
 		cancel()
 	}()
 
-	cfg, err := config.Load("config.yml")
+	cfg, esClient, err := loadDependencies(ctx)
 	if err != nil {
-		logger.FATAL("failed to load config", tag.NewErrorTag(err))
+		logger.FATAL("failed to load dependencies", tag.NewErrorTag(err))
 		return
 	}
-	logger.INFO("loaded config", tag.NewAnyTag("config", cfg))
 
-	svc, err := services.NewService(ctx, cfg)
+	svc, err := services.NewService(ctx, esClient)
 	if err != nil {
 		logger.FATAL("failed to create service", tag.NewErrorTag(err))
 		return
@@ -109,4 +109,18 @@ func initServer(ctx context.Context, router *gin.Engine, cfg *config.Configurati
 	}
 	logger.INFO("server exited properly")
 	return nil
+}
+
+func loadDependencies(ctx context.Context) (*config.Configuration, *database.ESClient, error) {
+	cfg, err := config.Load("config.yml")
+	if err != nil {
+		return nil, nil, err
+	}
+	logger.INFO("loaded config", tag.NewAnyTag("config", cfg))
+
+	esClient, err := database.InitESClient(cfg.ElasticSearch)
+	if err != nil {
+		return nil, nil, err
+	}
+	return cfg, esClient, nil
 }
